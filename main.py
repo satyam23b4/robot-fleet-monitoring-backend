@@ -47,15 +47,16 @@ robots = normalize_robot_data(raw_robot_data)
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
-    return {"message": "Welcome to the Robot Fleet Monitoring Backend!"}
+    return JSONResponse(content={"message": "Welcome to the Robot Fleet Monitoring Backend!"})
+
+from fastapi.responses import StreamingResponse
+import json
 
 @app.get("/api/robots")
 async def get_robots():
-    """REST API to get robot data"""
     global robots
     robots = update_robot_data(robots)
-    return JSONResponse(content=robots)
+    return StreamingResponse(iter([json.dumps(robots)]), media_type="application/json")
 
 @app.get("/api/logs", response_class=PlainTextResponse)
 async def get_logs():
@@ -91,6 +92,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    """Handle favicon requests"""
     return JSONResponse(content={}, status_code=204)
+
 
